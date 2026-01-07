@@ -57,6 +57,8 @@ const imageScale = document.getElementById('imageScale');
 const imageScaleLabel = document.getElementById('imageScaleLabel');
 const imageRotation = document.getElementById('imageRotation');
 const imageRotationLabel = document.getElementById('imageRotationLabel');
+const effectSize = document.getElementById('effectSize');
+const effectSizeLabel = document.getElementById('effectSizeLabel');
 
 // Crop Elements
 const cropBtn = document.getElementById('cropBtn');
@@ -149,7 +151,9 @@ function setupEventListeners() {
     canvas.addEventListener('mousedown', handleCanvasMouseDown);
     canvas.addEventListener('mousemove', handleCanvasMouseMove);
     canvas.addEventListener('mouseup', handleCanvasMouseUp);
+    canvas.addEventListener('mouseup', handleCanvasMouseUp);
     canvas.addEventListener('mouseleave', handleCanvasMouseUp);
+    canvas.addEventListener('dblclick', handleCanvasDoubleClick);
 
     // Text controls
     addTextBtn.addEventListener('click', addText);
@@ -193,6 +197,13 @@ function setupEventListeners() {
         backgroundColor = e.target.value;
         updateCanvas();
     });
+
+    // Effect size control
+    if (effectSize) {
+        effectSize.addEventListener('input', (e) => {
+            effectSizeLabel.textContent = `${e.target.value}px`;
+        });
+    }
 
     // Effect buttons
     effectBtns.forEach(btn => {
@@ -381,14 +392,22 @@ function addEffect(effectType) {
         heart: '❤️',
         star: '⭐',
         anger: '💢',
-        zzz: '💤'
+        zzz: '💤',
+        sparkle: '✨',
+        note: '🎵',
+        exclam: '❗',
+        question: '❓',
+        laugh: '😆',
+        thumbsup: '👍',
+        fire: '🔥',
+        skull: '💀'
     };
 
     const effect = {
         emoji: effectEmojis[effectType],
         x: Math.random() * (STICKER_WIDTH - 60) + 30,
         y: Math.random() * (STICKER_HEIGHT - 60) + 30,
-        size: 40
+        size: parseInt(effectSize.value)
     };
 
     effectElements.push(effect);
@@ -543,6 +562,47 @@ function handleCanvasMouseUp() {
         startPos: { x: 0, y: 0 }
     };
     canvas.style.cursor = 'default';
+}
+
+function handleCanvasDoubleClick(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    // Check text (reverse order)
+    for (let i = textElements.length - 1; i >= 0; i--) {
+        const text = textElements[i];
+        ctx.font = `${text.weight} ${text.size}px 'Noto Sans JP', sans-serif`;
+        const metrics = ctx.measureText(text.content);
+        const textWidth = metrics.width;
+        const textHeight = text.size;
+
+        if (Math.abs(mouseX - text.x) < textWidth / 2 + 10 &&
+            Math.abs(mouseY - text.y) < textHeight / 2 + 10) {
+            if (confirm('このテキストを削除しますか?')) {
+                textElements.splice(i, 1);
+                updateCanvas();
+            }
+            return;
+        }
+    }
+
+    // Check effects (reverse order)
+    for (let i = effectElements.length - 1; i >= 0; i--) {
+        const effect = effectElements[i];
+        const effectRadius = effect.size / 2;
+
+        if (Math.abs(mouseX - effect.x) < effectRadius + 10 &&
+            Math.abs(mouseY - effect.y) < effectRadius + 10) {
+            if (confirm('このエフェクトを削除しますか?')) {
+                effectElements.splice(i, 1);
+                updateCanvas();
+            }
+            return;
+        }
+    }
 }
 
 // ===== Reset =====
