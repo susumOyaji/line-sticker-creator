@@ -155,6 +155,39 @@ function setupEventListeners() {
     canvas.addEventListener('mouseleave', handleCanvasMouseUp);
     canvas.addEventListener('dblclick', handleCanvasDoubleClick);
 
+    // Touch support for iPad/tablets
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent('mouseup', {});
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: false });
+
+    canvas.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent('mouseup', {});
+        canvas.dispatchEvent(mouseEvent);
+    }, { passive: false });
+
     // Text controls
     addTextBtn.addEventListener('click', addText);
     textInput.addEventListener('keypress', (e) => {

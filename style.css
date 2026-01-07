@@ -648,29 +648,151 @@ button svg {
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 1200px) {
+
+/* Tablet (iPad) - 768px to 1024px */
+@media (max-width: 1024px) and (min-width: 768px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
     .main-content {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Larger touch targets for iPad */
+    button {
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+
+    .btn-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .effect-btn {
+        padding: var(--spacing-md);
+        font-size: 0.9rem;
+    }
+
+    /* Optimize effects grid for iPad */
+    .effects-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    /* Better sticker grid for iPad */
+    .sticker-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    /* Adjust input controls */
+    input[type="range"] {
+        height: 8px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    input[type="color"] {
+        width: 56px;
+        height: 56px;
     }
 }
 
-@media (max-width: 768px) {
+/* Tablet Portrait & Mobile - Below 768px */
+@media (max-width: 767px) {
+    .container {
+        padding: var(--spacing-sm);
+    }
+
     .header {
         flex-direction: column;
         gap: var(--spacing-md);
         text-align: center;
+        padding: var(--spacing-md);
     }
 
     .logo {
         flex-direction: column;
     }
 
-    .effects-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .logo h1 {
+        font-size: 1.5rem;
     }
 
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Larger touch targets for mobile */
+    button {
+        min-height: 48px;
+        font-size: 1rem;
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .btn-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .effect-btn {
+        padding: var(--spacing-md);
+        font-size: 1rem;
+    }
+
+    /* Mobile-friendly effects grid */
+    .effects-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    /* Mobile-friendly sticker grid */
     .sticker-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: var(--spacing-sm);
+    }
+
+    /* Adjust tool groups for mobile */
+    .tool-group {
+        gap: var(--spacing-md);
+    }
+
+    .grid-2-cols,
+    .grid-3-cols {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    /* Better input controls for touch */
+    input[type="range"] {
+        height: 10px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+    }
+
+    input[type="color"] {
+        width: 60px;
+        height: 60px;
+    }
+
+    input[type="text"] {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+        padding: var(--spacing-md);
+    }
+
+    select {
+        font-size: 16px;
+        padding: var(--spacing-md);
     }
 }
 
