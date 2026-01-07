@@ -207,6 +207,18 @@ function setupEventListeners() {
     downloadCurrent.addEventListener('click', downloadCurrentSticker);
     resetBtn.addEventListener('click', resetCanvas);
     clearAllBtn.addEventListener('click', clearAllStickers);
+    clearAllBtn.addEventListener('click', clearAllStickers);
+
+    // Sticker Grid Event Delegation (for Delete Buttons)
+    stickerGrid.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+            e.stopPropagation();
+            const id = Number(deleteBtn.dataset.id);
+            deleteSticker(id);
+        }
+    });
+
     // downloadAllBtn is handled by onclick in HTML to ensure reliability
 
     // Crop events
@@ -622,13 +634,23 @@ function renderStickerGrid() {
     stickerGrid.innerHTML = stickerCollection.map(sticker => `
         <div class="sticker-item" data-id="${sticker.id}">
             <img src="${sticker.dataUrl}" alt="Sticker">
-            <button class="delete-btn" onclick="deleteSticker(${sticker.id})">
+            <button class="delete-btn" data-id="${sticker.id}">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
                 </svg>
             </button>
         </div>
     `).join('');
+
+    // Attach event listeners directly to delete buttons
+    stickerGrid.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Delete button clicked'); // Debug
+            const id = Number(btn.dataset.id);
+            deleteSticker(id);
+        });
+    });
 }
 
 // ===== Delete Sticker =====
@@ -705,9 +727,9 @@ function downloadAllStickers() {
             if (index === stickerCollection.length - 1) {
                 setTimeout(() => {
                     isDownloading = false;
-                }, 1000); // 最後の処理の後に余裕を持たせる
+                }, 1500); // 最後の処理の後に余裕を持たせる
             }
-        }, index * 300); // 0.3秒間隔でダウンロード実行
+        }, index * 1000); // 1.0秒間隔でダウンロード実行（ブラウザのブロック回避のため延長）
     });
 }
 

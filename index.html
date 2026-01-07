@@ -65,37 +65,35 @@
                 <div class="tools-section">
                     <div class="tool-group">
                         <label class="tool-label">画像調整</label>
-                        <div class="tool-actions grid-2-cols">
-                            <button class="btn-secondary" id="cropBtn" disabled>
+                        <div class="tool-actions grid-3-cols">
+                            <button class="btn-secondary" id="cropBtn" disabled title="矩形切り抜き">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M17 15H19V17H17V15ZM7 7H9V9H7V7ZM17 11H19V13H17V11ZM13 17H15V19H13V17ZM17 7H19V9H17V7ZM7 11H9V13H7V11ZM7 15H9V17H7V15ZM7 3H9V5H7V3ZM11 17H13V19H11V17ZM17 3H19V5H17V3ZM21 7H23V9H21V7ZM5 7H3V21H17V19H5V7ZM21 15H23V17H21V15ZM13 3H15V5H13V3ZM11 3H9V5H11V3Z"
                                         fill="currentColor" />
                                 </svg>
-                                矩形切り抜き
+                                矩形
                             </button>
-                            <button class="btn-secondary" id="freeHandBtn" disabled>
+                            <button class="btn-secondary" id="freeHandBtn" disabled title="自由切り抜き">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M16.53 11.16c1.23-.26 2.4-.18 3.47.14.23-1.62-.22-3.41-1.68-4.87-1.57-1.58-4.14-2.12-6.32-1.34l-3-3-.4.36c.64 2.22.04 4.89-1.58 6.51C5.61 10.37 3.82 10.82 2.2 11.05c.32 1.07.4 2.24.14 3.47l4.08 4.08c-1.37 2.37-1.01 5.37 1.05 7.43 2.5 2.5 6.55 2.5 9.05 0 2.5-2.5 2.5-6.55 0-9.05-2.06-2.06-5.06-2.42-7.43-1.05l-4.08-4.08c-.76-2.18-.22-4.75 1.35-6.32 1.46-1.46 3.25-1.91 4.87-1.68l7.29 7.31z"
                                         fill="currentColor" />
                                 </svg>
-                                自由切り抜き
+                                自由
                             </button>
-                        </div>
-                        <div class="tool-actions">
-                            <button class="btn-secondary full-width" id="autoCutBtn" disabled>
+                            <button class="btn-secondary" id="autoCutBtn" disabled title="自動切り抜き (背景除去)">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6ZM19.5 15.4L22 14L19.5 12.6L19 10L18.5 12.6L16 14L18.5 15.4L19 18L19.5 15.4ZM22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2ZM14.82 5.56L12.56 8.5C12.21 8.96 11.66 9.24 11.08 9.25C11.05 9.25 11.03 9.25 11 9.25C10.39 9.25 9.81 8.92 9.49 8.38L8.62 6.91L5.12 11.45C4.38 12.42 4.6 13.81 5.56 14.55L13.11 20.36C13.48 20.64 13.91 20.78 14.34 20.78C15.01 20.78 15.66 20.47 16.09 19.91L19.58 15.38C20.33 14.41 20.1 13.02 19.14 12.28L14.82 5.56ZM15.11 13.66L11.8 17.96C11.63 18.17 11.33 18.21 11.12 18.05L6.8 14.73C6.59 14.57 6.55 14.27 6.71 14.06L9.12 10.93L10.96 14.03C11.13 14.31 11.46 14.46 11.78 14.39C12.11 14.33 12.38 14.08 12.44 13.75L13.19 9.45L15.52 13.08C15.68 13.29 15.64 13.59 15.43 13.75L15.11 13.66Z"
                                         fill="currentColor" />
                                 </svg>
-                                自動切り抜き (背景除去)
+                                自動
                             </button>
                         </div>
                         <div class="style-controls">
                             <label class="control-sublabel">サイズ</label>
-                            <input type="range" id="imageScale" min="0.5" max="2" step="0.1" value="1" title="画像サイズ">
+                            <input type="range" id="imageScale" min="0.01" max="2" step="0.01" value="1" title="画像サイズ">
                             <span class="size-label" id="imageScaleLabel">100%</span>
                         </div>
                         <div class="style-controls">

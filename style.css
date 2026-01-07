@@ -89,26 +89,7 @@ body {
     overflow: hidden;
 }
 
-.header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--success));
-    animation: shimmer 3s linear infinite;
-}
 
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-
-    100% {
-        transform: translateX(100%);
-    }
-}
 
 .logo {
     display: flex;
@@ -593,6 +574,11 @@ button svg {
     opacity: 0;
     transition: all var(--transition-fast);
     padding: 6px;
+    z-index: 10;
+}
+
+.sticker-item .delete-btn svg {
+    pointer-events: none;
 }
 
 .sticker-item:hover .delete-btn {
@@ -796,6 +782,12 @@ button svg {
 .grid-2-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+}
+
+.grid-3-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: var(--spacing-sm);
 }
 
