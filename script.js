@@ -21,6 +21,7 @@ let textElements = [];
 let effectElements = [];
 let backgroundColor = 'transparent';
 let stickerCollection = [];
+let selectedElement = { type: null, index: -1 };
 
 let cropper = null;
 let freeHandState = {
@@ -195,7 +196,26 @@ function setupEventListeners() {
     });
 
     fontSize.addEventListener('input', (e) => {
-        fontSizeLabel.textContent = `${e.target.value}px`;
+        const newSize = parseInt(e.target.value);
+        fontSizeLabel.textContent = `${newSize}px`;
+        if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
+            textElements[selectedElement.index].size = newSize;
+            updateCanvas();
+        }
+    });
+
+    textColor.addEventListener('change', (e) => {
+        if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
+            textElements[selectedElement.index].color = e.target.value;
+            updateCanvas();
+        }
+    });
+
+    fontWeight.addEventListener('change', (e) => {
+        if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
+            textElements[selectedElement.index].weight = e.target.value;
+            updateCanvas();
+        }
     });
 
     // Image transform controls
@@ -234,7 +254,12 @@ function setupEventListeners() {
     // Effect size control
     if (effectSize) {
         effectSize.addEventListener('input', (e) => {
-            effectSizeLabel.textContent = `${e.target.value}px`;
+            const newSize = parseInt(e.target.value);
+            effectSizeLabel.textContent = `${newSize}px`;
+            if (selectedElement.type === 'effect' && effectElements[selectedElement.index]) {
+                effectElements[selectedElement.index].size = newSize;
+                updateCanvas();
+            }
         });
     }
 
@@ -369,16 +394,8 @@ function updateCanvas() {
         ctx.restore();
     }
 
-    // Draw effects
-    effectElements.forEach(effect => {
-        ctx.font = `${effect.size}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(effect.emoji, effect.x, effect.y);
-    });
-
     // Draw text
-    textElements.forEach(text => {
+    textElements.forEach((text, index) => {
         ctx.font = `${text.weight} ${text.size}px 'Noto Sans JP', sans-serif`;
         ctx.fillStyle = text.color;
         ctx.textAlign = 'center';
@@ -389,6 +406,38 @@ function updateCanvas() {
         ctx.lineWidth = 3;
         ctx.strokeText(text.content, text.x, text.y);
         ctx.fillText(text.content, text.x, text.y);
+
+        // Draw bounding box if selected
+        if (selectedElement.type === 'text' && selectedElement.index === index) {
+            const metrics = ctx.measureText(text.content);
+            const textWidth = metrics.width;
+            const textHeight = text.size;
+            ctx.save();
+            ctx.strokeStyle = 'var(--primary)'; // Use a distinct color for selected element
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(text.x - textWidth / 2 - 10, text.y - textHeight / 2 - 10, textWidth + 20, textHeight + 20);
+            ctx.restore();
+        }
+    });
+
+    // Draw effects
+    effectElements.forEach((effect, index) => {
+        ctx.font = `${effect.size}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(effect.emoji, effect.x, effect.y);
+
+        // Draw bounding box if selected
+        if (selectedElement.type === 'effect' && selectedElement.index === index) {
+            const effectRadius = effect.size / 2;
+            ctx.save();
+            ctx.strokeStyle = 'var(--primary)'; // Use a distinct color for selected element
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(effect.x - effectRadius - 10, effect.y - effectRadius - 10, effect.size + 20, effect.size + 20);
+            ctx.restore();
+        }
     });
 }
 
@@ -455,6 +504,9 @@ function handleCanvasMouseDown(e) {
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
 
+    // Default to deselecting
+    let elementFound = false;
+
     // Check text elements (reverse order to prioritize top elements)
     for (let i = textElements.length - 1; i >= 0; i--) {
         const text = textElements[i];
@@ -463,15 +515,19 @@ function handleCanvasMouseDown(e) {
         const textWidth = metrics.width;
         const textHeight = text.size;
 
-        if (Math.abs(mouseX - text.x) < textWidth / 2 + 10 &&
-            Math.abs(mouseY - text.y) < textHeight / 2 + 10) {
+        if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
+            mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
             dragState = {
                 isDragging: true,
                 type: 'text',
                 index: i,
                 startPos: { x: mouseX, y: mouseY }
             };
+            selectedElement = { type: 'text', index: i };
+            elementFound = true;
             canvas.style.cursor = 'grabbing';
+            updateControlsForSelection();
+            updateCanvas();
             return;
         }
     }
@@ -481,15 +537,19 @@ function handleCanvasMouseDown(e) {
         const effect = effectElements[i];
         const effectRadius = effect.size / 2;
 
-        if (Math.abs(mouseX - effect.x) < effectRadius + 10 &&
-            Math.abs(mouseY - effect.y) < effectRadius + 10) {
+        if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
+            mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
             dragState = {
                 isDragging: true,
                 type: 'effect',
                 index: i,
                 startPos: { x: mouseX, y: mouseY }
             };
+            selectedElement = { type: 'effect', index: i };
+            elementFound = true;
             canvas.style.cursor = 'grabbing';
+            updateControlsForSelection();
+            updateCanvas();
             return;
         }
     }
@@ -508,9 +568,21 @@ function handleCanvasMouseDown(e) {
                 index: -1,
                 startPos: { x: mouseX, y: mouseY }
             };
+            // When image is dragged, deselect any other element
+            selectedElement = { type: null, index: -1 };
+            elementFound = true;
             canvas.style.cursor = 'grabbing';
+            updateControlsForSelection();
+            updateCanvas();
             return;
         }
+    }
+
+    // If no element was found, deselect
+    if (!elementFound) {
+        selectedElement = { type: null, index: -1 };
+        updateControlsForSelection();
+        updateCanvas();
     }
 }
 
@@ -550,8 +622,8 @@ function handleCanvasMouseMove(e) {
             const textWidth = metrics.width;
             const textHeight = text.size;
 
-            if (Math.abs(mouseX - text.x) < textWidth / 2 + 10 &&
-                Math.abs(mouseY - text.y) < textHeight / 2 + 10) {
+            if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
+                mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
                 hovering = true;
                 break;
             }
@@ -563,8 +635,8 @@ function handleCanvasMouseMove(e) {
                 const effect = effectElements[i];
                 const effectRadius = effect.size / 2;
 
-                if (Math.abs(mouseX - effect.x) < effectRadius + 10 &&
-                    Math.abs(mouseY - effect.y) < effectRadius + 10) {
+                if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
+                    mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
                     hovering = true;
                     break;
                 }
@@ -588,13 +660,16 @@ function handleCanvasMouseMove(e) {
 }
 
 function handleCanvasMouseUp() {
-    dragState = {
-        isDragging: false,
-        type: null,
-        index: -1,
-        startPos: { x: 0, y: 0 }
-    };
-    canvas.style.cursor = 'default';
+    if (dragState.isDragging) {
+        dragState = {
+            isDragging: false,
+            type: null,
+            index: -1,
+            startPos: { x: 0, y: 0 }
+        };
+        canvas.style.cursor = 'default';
+        // Don't deselect on mouse up, keep the selection
+    }
 }
 
 function handleCanvasDoubleClick(e) {
@@ -612,11 +687,13 @@ function handleCanvasDoubleClick(e) {
         const textWidth = metrics.width;
         const textHeight = text.size;
 
-        if (Math.abs(mouseX - text.x) < textWidth / 2 + 10 &&
-            Math.abs(mouseY - text.y) < textHeight / 2 + 10) {
+        if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
+            mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
             if (confirm('このテキストを削除しますか?')) {
                 textElements.splice(i, 1);
+                selectedElement = { type: null, index: -1 }; // Deselect after deletion
                 updateCanvas();
+                updateControlsForSelection();
             }
             return;
         }
@@ -627,14 +704,39 @@ function handleCanvasDoubleClick(e) {
         const effect = effectElements[i];
         const effectRadius = effect.size / 2;
 
-        if (Math.abs(mouseX - effect.x) < effectRadius + 10 &&
-            Math.abs(mouseY - effect.y) < effectRadius + 10) {
+        if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
+            mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
             if (confirm('このエフェクトを削除しますか?')) {
                 effectElements.splice(i, 1);
+                selectedElement = { type: null, index: -1 }; // Deselect after deletion
                 updateCanvas();
+                updateControlsForSelection();
             }
             return;
         }
+    }
+}
+
+function updateControlsForSelection() {
+    // Reset controls first
+    fontSize.value = 40; // Default value
+    fontSizeLabel.textContent = '40px';
+    textColor.value = '#000000'; // Default value
+    fontWeight.value = '700'; // Default value
+    effectSize.value = 40; // Default value
+    effectSizeLabel.textContent = '40px';
+
+
+    if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
+        const text = textElements[selectedElement.index];
+        fontSize.value = text.size;
+        fontSizeLabel.textContent = `${text.size}px`;
+        textColor.value = text.color;
+        fontWeight.value = text.weight;
+    } else if (selectedElement.type === 'effect' && effectElements[selectedElement.index]) {
+        const effect = effectElements[selectedElement.index];
+        effectSize.value = effect.size;
+        effectSizeLabel.textContent = `${effect.size}px`;
     }
 }
 
@@ -789,7 +891,7 @@ function downloadCurrentSticker() {
 // ===== Download All Stickers (ZIP) =====
 let isDownloading = false;
 
-function downloadAllStickers() {
+async function downloadAllStickers() {
     if (isDownloading) return;
 
     if (stickerCollection.length === 0) {
@@ -797,33 +899,48 @@ function downloadAllStickers() {
         return;
     }
 
-    if (!confirm(`${stickerCollection.length}枚のスタンプを個別の画像として保存します。\n（ブラウザの設定で複数ファイルのダウンロードを許可してください）`)) {
+    if (!confirm(`${stickerCollection.length}個のスタンプをZIPファイルとしてダウンロードしますか？`)) {
         return;
     }
 
     isDownloading = true;
+    downloadAllBtn.disabled = true;
+    const originalBtnText = downloadAllBtn.innerHTML;
+    downloadAllBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" class="animate-spin" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V2A10 10 0 002 12h2a8 8 0 018-8z" fill="currentColor"/>
+        </svg>
+        作成中...
+    `;
 
-    stickerCollection.forEach((sticker, index) => {
-        setTimeout(() => {
-            const link = document.createElement('a');
-            // ファイル名を sticker-01.png の形式にする
+    try {
+        const zip = new JSZip();
+
+        stickerCollection.forEach((sticker, index) => {
             const num = String(index + 1).padStart(2, '0');
-            link.download = `sticker-${num}.png`;
-            link.href = sticker.dataUrl;
+            const fileName = `sticker-${num}.png`;
+            // dataUrl is 'data:image/png;base64,iVBORw0KGgo...
+            const imgData = sticker.dataUrl.split(',')[1];
+            zip.file(fileName, imgData, { base64: true });
+        });
 
-            // Firefox等の一部のブラウザ対応のためDOMに追加してからクリック
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        const content = await zip.generateAsync({ type: 'blob' });
 
-            // 全てのダウンロードスケジュールが終わったらフラグを戻す
-            if (index === stickerCollection.length - 1) {
-                setTimeout(() => {
-                    isDownloading = false;
-                }, 1500); // 最後の処理の後に余裕を持たせる
-            }
-        }, index * 1000); // 1.0秒間隔でダウンロード実行（ブラウザのブロック回避のため延長）
-    });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `LINE-stickers-${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+    } catch (error) {
+        console.error('ZIPファイルの作成に失敗しました:', error);
+        alert('ZIPファイルの作成に失敗しました。');
+    } finally {
+        isDownloading = false;
+        downloadAllBtn.disabled = false;
+        downloadAllBtn.innerHTML = originalBtnText;
+    }
 }
 
 // ===== Crop Functions =====
