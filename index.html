@@ -31,10 +31,26 @@
                 </svg>
                 <h1>LINE Sticker Creator</h1>
             </div>
-            <div class="header-stats">
-                <div class="stat-item">
-                    <span class="stat-label">スタンプ数</span>
-                    <span class="stat-value" id="stickerCount">0</span>
+            <div class="header-info">
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">スタンプ数</span>
+                        <span class="stat-value" id="stickerCount">0</span>
+                    </div>
+                </div>
+                <div class="header-guidelines">
+                    <div class="guideline-item">
+                        <span class="guideline-icon">📐</span>
+                        <span class="guideline-text">370×320px</span>
+                    </div>
+                    <div class="guideline-item">
+                        <span class="guideline-icon">🖼️</span>
+                        <span class="guideline-text">PNG透過</span>
+                    </div>
+                    <div class="guideline-item">
+                        <span class="guideline-icon">📦</span>
+                        <span class="guideline-text">8/16/24/32/40個</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -95,190 +111,213 @@
                                 自動
                             </button>
                         </div>
-                        <div class="style-controls">
-                            <label class="control-sublabel">サイズ</label>
-                            <input type="range" id="imageScale" min="0.01" max="2" step="0.01" value="1" title="画像サイズ">
-                            <span class="size-label" id="imageScaleLabel">100%</span>
+                        <!-- Global Property Controls -->
+                        <div class="tool-group property-editor" id="propertyEditor">
+                            <label class="tool-label">プロパティ編集</label>
+                            <div class="style-controls">
+                                <label class="control-sublabel" id="sizeLabel">サイズ</label>
+                                <input type="range" id="globalSize" min="10" max="200" step="1" value="100">
+                                <span class="size-label" id="globalSizeValue">100%</span>
+                            </div>
+                            <div class="style-controls">
+                                <label class="control-sublabel">回転</label>
+                                <input type="range" id="globalRotation" min="0" max="360" step="1" value="0">
+                                <span class="size-label" id="globalRotationValue">0°</span>
+                            </div>
                         </div>
-                        <div class="style-controls">
-                            <label class="control-sublabel">回転</label>
-                            <input type="range" id="imageRotation" min="0" max="360" step="1" value="0" title="画像回転">
-                            <span class="size-label" id="imageRotationLabel">0°</span>
+
+                        <!-- Tools -->
+                        <div class="tools-section">
+                            <div class="tool-group">
+                                <label class="tool-label">画像調整</label>
+                                <div class="tool-actions grid-3-cols">
+                                    <button class="btn-secondary" id="cropBtn" disabled title="矩形切り抜き">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M17 15H19V17H17V15ZM7 7H9V9H7V7ZM17 11H19V13H17V11ZM13 17H15V19H13V17ZM17 7H19V9H17V7ZM7 11H9V13H7V11ZM7 15H9V17H7V15ZM7 3H9V5H7V3ZM11 17H13V19H11V17ZM17 3H19V5H17V3ZM21 7H23V9H21V7ZM5 7H3V21H17V19H5V7ZM21 15H23V17H21V15ZM13 3H15V5H13V3ZM11 3H9V5H11V3Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        矩形
+                                    </button>
+                                    <button class="btn-secondary" id="freeHandBtn" disabled title="自由切り抜き">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M16.53 11.16c1.23-.26 2.4-.18 3.47.14.23-1.62-.22-3.41-1.68-4.87-1.57-1.58-4.14-2.12-6.32-1.34l-3-3-.4.36c.64 2.22.04 4.89-1.58 6.51C5.61 10.37 3.82 10.82 2.2 11.05c.32 1.07.4 2.24.14 3.47l4.08 4.08c-1.37 2.37-1.01 5.37 1.05 7.43 2.5 2.5 6.55 2.5 9.05 0 2.5-2.5 2.5-6.55 0-9.05-2.06-2.06-5.06-2.42-7.43-1.05l-4.08-4.08c-.76-2.18-.22-4.75 1.35-6.32 1.46-1.46 3.25-1.91 4.87-1.68l7.29 7.31z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        自由
+                                    </button>
+                                    <button class="btn-secondary" id="autoCutBtn" disabled title="自動切り抜き (背景除去)">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M7.5 5.6L10 7L8.6 4.5L10 2L7.5 3.4L5 2L6.4 4.5L5 7L7.5 5.6ZM19.5 15.4L22 14L19.5 12.6L19 10L18.5 12.6L16 14L18.5 15.4L19 18L19.5 15.4ZM22 2L19.5 3.4L17 2L18.4 4.5L17 7L19.5 5.6L22 7L20.6 4.5L22 2ZM14.82 5.56L12.56 8.5C12.21 8.96 11.66 9.24 11.08 9.25C11.05 9.25 11.03 9.25 11 9.25C10.39 9.25 9.81 8.92 9.49 8.38L8.62 6.91L5.12 11.45C4.38 12.42 4.6 13.81 5.56 14.55L13.11 20.36C13.48 20.64 13.91 20.78 14.34 20.78C15.01 20.78 15.66 20.47 16.09 19.91L19.58 15.38C20.33 14.41 20.1 13.02 19.14 12.28L14.82 5.56ZM15.11 13.66L11.8 17.96C11.63 18.17 11.33 18.21 11.12 18.05L6.8 14.73C6.59 14.57 6.55 14.27 6.71 14.06L9.12 10.93L10.96 14.03C11.13 14.31 11.46 14.46 11.78 14.39C12.11 14.33 12.38 14.08 12.44 13.75L13.19 9.45L15.52 13.08C15.68 13.29 15.64 13.59 15.43 13.75L15.11 13.66Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        自動
+                                    </button>
+                                </div>
+                                <p class="hint-text">💡 アイテムをドラッグして位置調整できます（ダブルクリックで削除）</p>
+                            </div>
+
+                            <div class="tool-group">
+                                <label class="tool-label">テキスト追加</label>
+                                <div class="input-group">
+                                    <input type="text" id="textInput" placeholder="スタンプのテキストを入力" maxlength="20">
+                                    <button class="btn-primary" id="addTextBtn">追加</button>
+                                </div>
+                            </div>
+
+                            <div class="tool-group">
+                                <label class="tool-label">テキストスタイル</label>
+                                <div class="style-controls">
+                                    <input type="color" id="textColor" value="#000000" title="テキスト色">
+                                    <select id="fontWeight">
+                                        <option value="400">標準</option>
+                                        <option value="700" selected>太字</option>
+                                        <option value="900">極太</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+
+                            <div class="tool-group">
+                                <label class="tool-label">背景</label>
+                                <div class="bg-controls">
+                                    <button class="btn-secondary" id="transparentBg">透明</button>
+                                    <button class="btn-secondary" id="whiteBg">白</button>
+                                    <input type="color" id="bgColor" value="#ffffff" title="カスタム背景色">
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn-success" id="saveSticker">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M17 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V7L17 3ZM19 19H5V5H16.17L19 7.83V19ZM12 12C10.34 12 9 13.34 9 15C9 16.66 10.34 18 12 18C13.66 18 15 16.66 15 15C15 13.34 13.66 12 12 12ZM6 6H15V10H6V6Z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    スタンプを保存
+                                </button>
+                                <button class="btn-primary" id="downloadCurrent">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19ZM13 12.67L15.59 10.09L17 11.5L12 16.5L7 11.5L8.41 10.09L11 12.67V3H13V12.67Z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    ダウンロード
+                                </button>
+                            </div>
                         </div>
-                        <p class="hint-text">💡 画像をドラッグして位置を調整できます（アイテムをダブルクリックで削除）</p>
                     </div>
 
-                    <div class="tool-group">
-                        <label class="tool-label">テキスト追加</label>
-                        <div class="input-group">
-                            <input type="text" id="textInput" placeholder="スタンプのテキストを入力" maxlength="20">
-                            <button class="btn-primary" id="addTextBtn">追加</button>
+                    <!-- Right Panel - Sticker Collection -->
+                    <div class="collection-panel">
+                        <div class="panel-header">
+                            <h2>スタンプコレクション</h2>
+                            <div class="header-actions">
+                                <button class="btn-icon" id="clearAllBtn" title="全て削除">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
+                                            fill="currentColor" />
+                                    </svg>
+                                </button>
+                                <button class="btn-success" id="downloadAllBtn" onclick="downloadAllStickers()">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z" fill="currentColor" />
+                                    </svg>
+                                    全てダウンロード
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="sticker-grid" id="stickerGrid">
+                            <div class="empty-state">
+                                <svg class="empty-icon" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
+                                        fill="currentColor" />
+                                </svg>
+                                <p>まだスタンプがありません</p>
+                                <p class="empty-hint">左のエディターでスタンプを作成してください</p>
+                            </div>
+                        </div>
+
+                        <div class="tool-group">
+                            <label class="tool-label">エフェクト</label>
+                            <div class="effects-grid">
+                                <button class="effect-btn" data-effect="sweat">💦 汗</button>
+                                <button class="effect-btn" data-effect="tears">😢 涙</button>
+                                <button class="effect-btn" data-effect="heart">❤️ ハート</button>
+                                <button class="effect-btn" data-effect="star">⭐ 星</button>
+                                <button class="effect-btn" data-effect="anger">💢 怒り</button>
+                                <button class="effect-btn" data-effect="zzz">💤 睡眠</button>
+                                <button class="effect-btn" data-effect="sparkle">✨ キラキラ</button>
+                                <button class="effect-btn" data-effect="note">🎵 音符</button>
+                                <button class="effect-btn" data-effect="exclam">❗ ビックリ</button>
+                                <button class="effect-btn" data-effect="question">❓ ハテナ</button>
+                                <button class="effect-btn" data-effect="laugh">😆 笑</button>
+                                <button class="effect-btn" data-effect="thumbsup">👍 グッド</button>
+                                <button class="effect-btn" data-effect="fire">🔥 炎</button>
+                                <button class="effect-btn" data-effect="skull">💀 ドクロ</button>
+                                <button class="effect-btn" data-effect="bulb">💡 電球</button>
+                                <button class="effect-btn" data-effect="ok">⭕ OK</button>
+                                <button class="effect-btn" data-effect="ng">❌ NG</button>
+                                <button class="effect-btn" data-effect="thinking">🤔 考え中</button>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="tool-group">
-                        <label class="tool-label">テキストスタイル</label>
-                        <div class="style-controls">
-                            <input type="color" id="textColor" value="#000000" title="テキスト色">
-                            <input type="range" id="fontSize" min="20" max="80" value="40" title="フォントサイズ">
-                            <span class="size-label" id="fontSizeLabel">40px</span>
-                            <select id="fontWeight">
-                                <option value="400">標準</option>
-                                <option value="700" selected>太字</option>
-                                <option value="900">極太</option>
-                            </select>
+            <!-- Crop Modal -->
+            <div class="modal hidden" id="cropModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>画像の切り抜き</h3>
+                        <button class="btn-icon" id="closeCropBtn">×</button>
+                    </div>
+                    <div class="crop-container">
+                        <img id="cropImage" src="">
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-secondary" id="cancelCropBtn">キャンセル</button>
+                        <button class="btn-primary" id="applyCropBtn">切り抜きを適用</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Freehand Crop Modal -->
+            <div class="modal hidden" id="freeHandModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>自由切り抜き</h3>
+                        <button class="btn-icon" id="closeFreeHandBtn">×</button>
+                    </div>
+                    <div class="crop-container bg-checkerboard">
+                        <canvas id="freeHandCanvas"></canvas>
+                    </div>
+                    <div class="modal-footer space-between">
+                        <div class="footer-left">
+                            <p class="hint-text small">🖌️ マウスで切り抜きたい範囲を囲んでください</p>
+                        </div>
+                        <div class="footer-actions">
+                            <button class="btn-secondary" id="resetFreeHandBtn">リセット</button>
+                            <button class="btn-secondary" id="cancelFreeHandBtn">キャンセル</button>
+                            <div class="btn-group">
+                                <button class="btn-success" id="keepInsideBtn" style="margin-right: 8px;">内側を残す</button>
+                                <button class="btn-danger" id="removeInsideBtn">内側を消す</button>
+                            </div>
                         </div>
                     </div>
-
-
-
-                    <div class="tool-group">
-                        <label class="tool-label">背景</label>
-                        <div class="bg-controls">
-                            <button class="btn-secondary" id="transparentBg">透明</button>
-                            <button class="btn-secondary" id="whiteBg">白</button>
-                            <input type="color" id="bgColor" value="#ffffff" title="カスタム背景色">
-                        </div>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button class="btn-success" id="saveSticker">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M17 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V7L17 3ZM19 19H5V5H16.17L19 7.83V19ZM12 12C10.34 12 9 13.34 9 15C9 16.66 10.34 18 12 18C13.66 18 15 16.66 15 15C15 13.34 13.66 12 12 12ZM6 6H15V10H6V6Z"
-                                    fill="currentColor" />
-                            </svg>
-                            スタンプを保存
-                        </button>
-                        <button class="btn-primary" id="downloadCurrent">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M19 12V19H5V12H3V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V12H19ZM13 12.67L15.59 10.09L17 11.5L12 16.5L7 11.5L8.41 10.09L11 12.67V3H13V12.67Z"
-                                    fill="currentColor" />
-                            </svg>
-                            ダウンロード
-                        </button>
-                    </div>
                 </div>
             </div>
 
-            <!-- Right Panel - Sticker Collection -->
-            <div class="collection-panel">
-                <div class="panel-header">
-                    <h2>スタンプコレクション</h2>
-                    <div class="header-actions">
-                        <button class="btn-icon" id="clearAllBtn" title="全て削除">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z"
-                                    fill="currentColor" />
-                            </svg>
-                        </button>
-                        <button class="btn-success" id="downloadAllBtn" onclick="downloadAllStickers()">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z" fill="currentColor" />
-                            </svg>
-                            全てダウンロード
-                        </button>
-                    </div>
-                </div>
-
-                <div class="sticker-grid" id="stickerGrid">
-                    <div class="empty-state">
-                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
-                                fill="currentColor" />
-                        </svg>
-                        <p>まだスタンプがありません</p>
-                        <p class="empty-hint">左のエディターでスタンプを作成してください</p>
-                    </div>
-                </div>
-
-                <div class="guidelines">
-                    <h3>LINEスタンプガイドライン</h3>
-                    <ul>
-                        <li>✅ サイズ: 370×320px（自動調整）</li>
-                        <li>✅ 形式: PNG（透過推奨）</li>
-                        <li>✅ 最小セット数: 8個</li>
-                        <li>✅ 推奨セット数: 16個、24個、32個、40個</li>
-                    </ul>
-                </div>
-
-                <div class="tool-group">
-                    <label class="tool-label">エフェクト</label>
-                    <div class="effects-grid">
-                        <button class="effect-btn" data-effect="sweat">💦 汗</button>
-                        <button class="effect-btn" data-effect="tears">😢 涙</button>
-                        <button class="effect-btn" data-effect="heart">❤️ ハート</button>
-                        <button class="effect-btn" data-effect="star">⭐ 星</button>
-                        <button class="effect-btn" data-effect="anger">💢 怒り</button>
-                        <button class="effect-btn" data-effect="zzz">💤 睡眠</button>
-                        <button class="effect-btn" data-effect="sparkle">✨ キラキラ</button>
-                        <button class="effect-btn" data-effect="note">🎵 音符</button>
-                        <button class="effect-btn" data-effect="exclam">❗ ビックリ</button>
-                        <button class="effect-btn" data-effect="question">❓ ハテナ</button>
-                        <button class="effect-btn" data-effect="laugh">😆 笑</button>
-                        <button class="effect-btn" data-effect="thumbsup">👍 グッド</button>
-                        <button class="effect-btn" data-effect="fire">🔥 炎</button>
-                        <button class="effect-btn" data-effect="skull">💀 ドクロ</button>
-                    </div>
-                    <div class="style-controls" style="margin-top: 10px;">
-                        <label class="control-sublabel">サイズ</label>
-                        <input type="range" id="effectSize" min="10" max="150" step="5" value="40" title="エフェクトサイズ">
-                        <span class="size-label" id="effectSizeLabel">40px</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Crop Modal -->
-    <div class="modal hidden" id="cropModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>画像の切り抜き</h3>
-                <button class="btn-icon" id="closeCropBtn">×</button>
-            </div>
-            <div class="crop-container">
-                <img id="cropImage" src="">
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" id="cancelCropBtn">キャンセル</button>
-                <button class="btn-primary" id="applyCropBtn">切り抜きを適用</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Freehand Crop Modal -->
-    <div class="modal hidden" id="freeHandModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>自由切り抜き</h3>
-                <button class="btn-icon" id="closeFreeHandBtn">×</button>
-            </div>
-            <div class="crop-container bg-checkerboard">
-                <canvas id="freeHandCanvas"></canvas>
-            </div>
-            <div class="modal-footer space-between">
-                <div class="footer-left">
-                    <p class="hint-text small">🖌️ マウスで切り抜きたい範囲を囲んでください</p>
-                </div>
-                <div class="footer-actions">
-                    <button class="btn-secondary" id="resetFreeHandBtn">リセット</button>
-                    <button class="btn-secondary" id="cancelFreeHandBtn">キャンセル</button>
-                    <div class="btn-group">
-                        <button class="btn-success" id="keepInsideBtn" style="margin-right: 8px;">内側を残す</button>
-                        <button class="btn-danger" id="removeInsideBtn">内側を消す</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="script.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+            <script src="script.js"></script>
 </body>
 
 </html>

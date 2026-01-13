@@ -40,9 +40,16 @@ const uploadPrompt = document.getElementById('uploadPrompt');
 const textInput = document.getElementById('textInput');
 const addTextBtn = document.getElementById('addTextBtn');
 const textColor = document.getElementById('textColor');
-const fontSize = document.getElementById('fontSize');
-const fontSizeLabel = document.getElementById('fontSizeLabel');
+const fontSize = null; // Removed in UI
+const fontSizeLabel = null; // Removed in UI
 const fontWeight = document.getElementById('fontWeight');
+const textRotation = null; // Removed in UI
+const textRotationLabel = null; // Removed in UI
+const globalSize = document.getElementById('globalSize');
+const globalSizeValue = document.getElementById('globalSizeValue');
+const globalRotation = document.getElementById('globalRotation');
+const globalRotationValue = document.getElementById('globalRotationValue');
+const sizeLabel = document.getElementById('sizeLabel');
 const transparentBg = document.getElementById('transparentBg');
 const whiteBg = document.getElementById('whiteBg');
 const bgColor = document.getElementById('bgColor');
@@ -54,12 +61,12 @@ const stickerCount = document.getElementById('stickerCount');
 const clearAllBtn = document.getElementById('clearAllBtn');
 const downloadAllBtn = document.getElementById('downloadAllBtn');
 const effectBtns = document.querySelectorAll('.effect-btn');
-const imageScale = document.getElementById('imageScale');
-const imageScaleLabel = document.getElementById('imageScaleLabel');
-const imageRotation = document.getElementById('imageRotation');
-const imageRotationLabel = document.getElementById('imageRotationLabel');
-const effectSize = document.getElementById('effectSize');
-const effectSizeLabel = document.getElementById('effectSizeLabel');
+const imageScale = null; // Removed
+const imageScaleLabel = null; // Removed
+const imageRotation = null; // Removed
+const imageRotationLabel = null; // Removed
+const effectSize = null; // Removed
+const effectSizeLabel = null; // Removed
 
 // Crop Elements
 const cropBtn = document.getElementById('cropBtn');
@@ -195,13 +202,36 @@ function setupEventListeners() {
         if (e.key === 'Enter') addText();
     });
 
-    fontSize.addEventListener('input', (e) => {
-        const newSize = parseInt(e.target.value);
-        fontSizeLabel.textContent = `${newSize}px`;
-        if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
-            textElements[selectedElement.index].size = newSize;
-            updateCanvas();
+    // Unified controls (Global Size & Rotation)
+    globalSize.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+
+        if (selectedElement.type === 'text') {
+            textElements[selectedElement.index].size = value;
+            globalSizeValue.textContent = `${value}px`;
+        } else if (selectedElement.type === 'effect') {
+            effectElements[selectedElement.index].size = value;
+            globalSizeValue.textContent = `${value}px`;
+        } else {
+            // Default to image scale if nothing or image selected
+            imageTransform.scale = value / 100;
+            globalSizeValue.textContent = `${value}%`;
         }
+        updateCanvas();
+    });
+
+    globalRotation.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value);
+        globalRotationValue.textContent = `${value}°`;
+
+        if (selectedElement.type === 'text') {
+            textElements[selectedElement.index].rotation = value;
+        } else if (selectedElement.type === 'effect') {
+            effectElements[selectedElement.index].rotation = value;
+        } else {
+            imageTransform.rotation = value;
+        }
+        updateCanvas();
     });
 
     textColor.addEventListener('change', (e) => {
@@ -218,22 +248,7 @@ function setupEventListeners() {
         }
     });
 
-    // Image transform controls
-    if (imageScale) {
-        imageScale.addEventListener('input', (e) => {
-            imageTransform.scale = parseFloat(e.target.value);
-            imageScaleLabel.textContent = `${Math.round(imageTransform.scale * 100)}%`;
-            updateCanvas();
-        });
-    }
-
-    if (imageRotation) {
-        imageRotation.addEventListener('input', (e) => {
-            imageTransform.rotation = parseInt(e.target.value);
-            imageRotationLabel.textContent = `${e.target.value}°`;
-            updateCanvas();
-        });
-    }
+    // Image transform controls removed (moved to global)
 
     // Background controls
     transparentBg.addEventListener('click', () => {
@@ -251,17 +266,7 @@ function setupEventListeners() {
         updateCanvas();
     });
 
-    // Effect size control
-    if (effectSize) {
-        effectSize.addEventListener('input', (e) => {
-            const newSize = parseInt(e.target.value);
-            effectSizeLabel.textContent = `${newSize}px`;
-            if (selectedElement.type === 'effect' && effectElements[selectedElement.index]) {
-                effectElements[selectedElement.index].size = newSize;
-                updateCanvas();
-            }
-        });
-    }
+    // Effect size control removed (moved to global)
 
     // Effect buttons
     effectBtns.forEach(btn => {
@@ -396,6 +401,12 @@ function updateCanvas() {
 
     // Draw text
     textElements.forEach((text, index) => {
+        ctx.save();
+
+        // Apply rotation
+        ctx.translate(text.x, text.y);
+        ctx.rotate((text.rotation * Math.PI) / 180);
+
         ctx.font = `${text.weight} ${text.size}px 'Noto Sans JP', sans-serif`;
         ctx.fillStyle = text.color;
         ctx.textAlign = 'center';
@@ -404,40 +415,45 @@ function updateCanvas() {
         // Add stroke for better visibility
         ctx.strokeStyle = text.color === '#000000' ? '#ffffff' : '#000000';
         ctx.lineWidth = 3;
-        ctx.strokeText(text.content, text.x, text.y);
-        ctx.fillText(text.content, text.x, text.y);
+        ctx.strokeText(text.content, 0, 0);
+        ctx.fillText(text.content, 0, 0);
 
         // Draw bounding box if selected
         if (selectedElement.type === 'text' && selectedElement.index === index) {
             const metrics = ctx.measureText(text.content);
             const textWidth = metrics.width;
             const textHeight = text.size;
-            ctx.save();
-            ctx.strokeStyle = 'var(--primary)'; // Use a distinct color for selected element
+            ctx.strokeStyle = '#6366F1'; // Primary color
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
-            ctx.strokeRect(text.x - textWidth / 2 - 10, text.y - textHeight / 2 - 10, textWidth + 20, textHeight + 20);
-            ctx.restore();
+            ctx.strokeRect(-textWidth / 2 - 10, -textHeight / 2 - 10, textWidth + 20, textHeight + 20);
+            ctx.setLineDash([]);
         }
+
+        ctx.restore();
     });
 
     // Draw effects
     effectElements.forEach((effect, index) => {
+        ctx.save();
+        ctx.translate(effect.x, effect.y);
+        ctx.rotate(((effect.rotation || 0) * Math.PI) / 180);
+
         ctx.font = `${effect.size}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(effect.emoji, effect.x, effect.y);
+        ctx.fillText(effect.emoji, 0, 0);
 
         // Draw bounding box if selected
         if (selectedElement.type === 'effect' && selectedElement.index === index) {
             const effectRadius = effect.size / 2;
-            ctx.save();
-            ctx.strokeStyle = 'var(--primary)'; // Use a distinct color for selected element
+            ctx.strokeStyle = '#6366F1'; // Primary color
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
-            ctx.strokeRect(effect.x - effectRadius - 10, effect.y - effectRadius - 10, effect.size + 20, effect.size + 20);
-            ctx.restore();
+            ctx.strokeRect(-effectRadius - 5, -effectRadius - 5, effect.size + 10, effect.size + 10);
+            ctx.setLineDash([]);
         }
+        ctx.restore();
     });
 }
 
@@ -456,13 +472,18 @@ function addText() {
         content: content,
         x: STICKER_WIDTH / 2,
         y: STICKER_HEIGHT - 40,
-        size: parseInt(fontSize.value),
+        size: 40, // Default font size
         color: textColor.value,
-        weight: fontWeight.value
+        weight: fontWeight.value,
+        rotation: 0
     };
 
     textElements.push(text);
     textInput.value = '';
+
+    // Select the new text automatically
+    selectedElement = { type: 'text', index: textElements.length - 1 };
+    updateControlsForSelection();
     updateCanvas();
 }
 
@@ -482,17 +503,26 @@ function addEffect(effectType) {
         laugh: '😆',
         thumbsup: '👍',
         fire: '🔥',
-        skull: '💀'
+        skull: '💀',
+        bulb: '💡',
+        ok: '⭕',
+        ng: '❌',
+        thinking: '🤔'
     };
 
     const effect = {
         emoji: effectEmojis[effectType],
         x: Math.random() * (STICKER_WIDTH - 60) + 30,
         y: Math.random() * (STICKER_HEIGHT - 60) + 30,
-        size: parseInt(effectSize.value)
+        size: 40, // Default effect size
+        rotation: 0
     };
 
     effectElements.push(effect);
+
+    // Select the new effect automatically
+    selectedElement = { type: 'effect', index: effectElements.length - 1 };
+    updateControlsForSelection();
     updateCanvas();
 }
 
@@ -515,8 +545,15 @@ function handleCanvasMouseDown(e) {
         const textWidth = metrics.width;
         const textHeight = text.size;
 
-        if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
-            mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
+        // Transform mouse point to local space of text
+        const dx = mouseX - text.x;
+        const dy = mouseY - text.y;
+        const angle = -(text.rotation || 0) * Math.PI / 180;
+        const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+        const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+        if (localX > -textWidth / 2 - 10 && localX < textWidth / 2 + 10 &&
+            localY > -textHeight / 2 - 10 && localY < textHeight / 2 + 10) {
             dragState = {
                 isDragging: true,
                 type: 'text',
@@ -537,8 +574,15 @@ function handleCanvasMouseDown(e) {
         const effect = effectElements[i];
         const effectRadius = effect.size / 2;
 
-        if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
-            mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
+        // Transform mouse point to local space of effect
+        const dx = mouseX - effect.x;
+        const dy = mouseY - effect.y;
+        const angle = -(effect.rotation || 0) * Math.PI / 180;
+        const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+        const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+        if (localX > -effectRadius - 10 && localX < effectRadius + 10 &&
+            localY > -effectRadius - 10 && localY < effectRadius + 10) {
             dragState = {
                 isDragging: true,
                 type: 'effect',
@@ -622,8 +666,15 @@ function handleCanvasMouseMove(e) {
             const textWidth = metrics.width;
             const textHeight = text.size;
 
-            if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
-                mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
+            // Transform mouse point to local space of text
+            const dx = mouseX - text.x;
+            const dy = mouseY - text.y;
+            const angle = -(text.rotation || 0) * Math.PI / 180;
+            const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+            const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+            if (localX > -textWidth / 2 - 10 && localX < textWidth / 2 + 10 &&
+                localY > -textHeight / 2 - 10 && localY < textHeight / 2 + 10) {
                 hovering = true;
                 break;
             }
@@ -635,8 +686,15 @@ function handleCanvasMouseMove(e) {
                 const effect = effectElements[i];
                 const effectRadius = effect.size / 2;
 
-                if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
-                    mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
+                // Transform mouse point to local space
+                const dx = mouseX - effect.x;
+                const dy = mouseY - effect.y;
+                const angle = -(effect.rotation || 0) * Math.PI / 180;
+                const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+                const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+                if (localX > -effectRadius - 10 && localX < effectRadius + 10 &&
+                    localY > -effectRadius - 10 && localY < effectRadius + 10) {
                     hovering = true;
                     break;
                 }
@@ -687,8 +745,15 @@ function handleCanvasDoubleClick(e) {
         const textWidth = metrics.width;
         const textHeight = text.size;
 
-        if (mouseX > text.x - textWidth / 2 - 10 && mouseX < text.x + textWidth / 2 + 10 &&
-            mouseY > text.y - textHeight / 2 - 10 && mouseY < text.y + textHeight / 2 + 10) {
+        // Transform mouse point to local space of text
+        const dx = mouseX - text.x;
+        const dy = mouseY - text.y;
+        const angle = -(text.rotation || 0) * Math.PI / 180;
+        const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+        const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+        if (localX > -textWidth / 2 - 10 && localX < textWidth / 2 + 10 &&
+            localY > -textHeight / 2 - 10 && localY < textHeight / 2 + 10) {
             if (confirm('このテキストを削除しますか?')) {
                 textElements.splice(i, 1);
                 selectedElement = { type: null, index: -1 }; // Deselect after deletion
@@ -704,8 +769,15 @@ function handleCanvasDoubleClick(e) {
         const effect = effectElements[i];
         const effectRadius = effect.size / 2;
 
-        if (mouseX > effect.x - effectRadius - 10 && mouseX < effect.x + effectRadius + 10 &&
-            mouseY > effect.y - effectRadius - 10 && mouseY < effect.y + effectRadius + 10) {
+        // Transform mouse point to local space
+        const dx = mouseX - effect.x;
+        const dy = mouseY - effect.y;
+        const angle = -(effect.rotation || 0) * Math.PI / 180;
+        const localX = dx * Math.cos(angle) - dy * Math.sin(angle);
+        const localY = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+        if (localX > -effectRadius - 10 && localX < effectRadius + 10 &&
+            localY > -effectRadius - 10 && localY < effectRadius + 10) {
             if (confirm('このエフェクトを削除しますか?')) {
                 effectElements.splice(i, 1);
                 selectedElement = { type: null, index: -1 }; // Deselect after deletion
@@ -718,25 +790,39 @@ function handleCanvasDoubleClick(e) {
 }
 
 function updateControlsForSelection() {
-    // Reset controls first
-    fontSize.value = 40; // Default value
-    fontSizeLabel.textContent = '40px';
-    textColor.value = '#000000'; // Default value
-    fontWeight.value = '700'; // Default value
-    effectSize.value = 40; // Default value
-    effectSizeLabel.textContent = '40px';
-
-
     if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
         const text = textElements[selectedElement.index];
-        fontSize.value = text.size;
-        fontSizeLabel.textContent = `${text.size}px`;
+        sizeLabel.textContent = '文字サイズ';
+        globalSize.min = 10;
+        globalSize.max = 100;
+        globalSize.value = text.size;
+        globalSizeValue.textContent = `${text.size}px`;
+
+        globalRotation.value = text.rotation || 0;
+        globalRotationValue.textContent = `${text.rotation || 0}°`;
+
         textColor.value = text.color;
         fontWeight.value = text.weight;
     } else if (selectedElement.type === 'effect' && effectElements[selectedElement.index]) {
         const effect = effectElements[selectedElement.index];
-        effectSize.value = effect.size;
-        effectSizeLabel.textContent = `${effect.size}px`;
+        sizeLabel.textContent = 'サイズ';
+        globalSize.min = 10;
+        globalSize.max = 200;
+        globalSize.value = effect.size;
+        globalSizeValue.textContent = `${effect.size}px`;
+
+        globalRotation.value = effect.rotation || 0;
+        globalRotationValue.textContent = `${effect.rotation || 0}°`;
+    } else {
+        // Image or no selection
+        sizeLabel.textContent = '画像サイズ';
+        globalSize.min = 10;
+        globalSize.max = 200;
+        globalSize.value = Math.round(imageTransform.scale * 100);
+        globalSizeValue.textContent = `${Math.round(imageTransform.scale * 100)}%`;
+
+        globalRotation.value = imageTransform.rotation;
+        globalRotationValue.textContent = `${imageTransform.rotation}°`;
     }
 }
 
@@ -751,14 +837,12 @@ function resetCanvas() {
         scale: 1,
         rotation: 0
     };
-    if (imageScale) {
-        imageScale.value = 1;
-        imageScaleLabel.textContent = '100%';
-    }
-    if (imageRotation) {
-        imageRotation.value = 0;
-        imageRotationLabel.textContent = '0°';
-    }
+
+    globalSize.value = 100;
+    globalSizeValue.textContent = '100%';
+    globalRotation.value = 0;
+    globalRotationValue.textContent = '0°';
+    sizeLabel.textContent = '画像サイズ';
     textElements = [];
     effectElements = [];
     backgroundColor = 'transparent';
