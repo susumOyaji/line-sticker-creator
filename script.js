@@ -1077,13 +1077,13 @@ function applyCrop() {
         };
 
         // Update UI controls
-        if (imageScale) {
-            imageScale.value = scale;
-            imageScaleLabel.textContent = `${Math.round(scale * 100)}%`;
+        if (globalSize) {
+            globalSize.value = Math.round(scale * 100);
+            globalSizeValue.textContent = `${Math.round(scale * 100)}%`;
         }
-        if (imageRotation) {
-            imageRotation.value = 0;
-            imageRotationLabel.textContent = '0°';
+        if (globalRotation) {
+            globalRotation.value = 0;
+            globalRotationValue.textContent = '0°';
         }
 
         updateCanvas();
