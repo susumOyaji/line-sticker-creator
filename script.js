@@ -34,22 +34,17 @@ let freeHandState = {
 
 // ===== DOM Elements =====
 const canvas = document.getElementById('mainCanvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
 const canvasContainer = document.querySelector('.canvas-container');
 const uploadPrompt = document.getElementById('uploadPrompt');
 const textInput = document.getElementById('textInput');
 const addTextBtn = document.getElementById('addTextBtn');
 const textColor = document.getElementById('textColor');
-const fontSize = null; // Removed in UI
-const fontSizeLabel = null; // Removed in UI
 const fontWeight = document.getElementById('fontWeight');
-const textRotation = null; // Removed in UI
-const textRotationLabel = null; // Removed in UI
 const globalSize = document.getElementById('globalSize');
 const globalSizeValue = document.getElementById('globalSizeValue');
 const globalRotation = document.getElementById('globalRotation');
 const globalRotationValue = document.getElementById('globalRotationValue');
-const sizeLabel = document.getElementById('sizeLabel');
 const transparentBg = document.getElementById('transparentBg');
 const whiteBg = document.getElementById('whiteBg');
 const bgColor = document.getElementById('bgColor');
@@ -62,12 +57,6 @@ const clearAllBtn = document.getElementById('clearAllBtn');
 const downloadAllBtn = document.getElementById('downloadAllBtn');
 const effectSelect = document.getElementById('effectSelect');
 const addEffectBtn = document.getElementById('addEffectBtn');
-const imageScale = null; // Removed
-const imageScaleLabel = null; // Removed
-const imageRotation = null; // Removed
-const imageRotationLabel = null; // Removed
-const effectSize = null; // Removed
-const effectSizeLabel = null; // Removed
 
 // Crop Elements
 const cropBtn = document.getElementById('cropBtn');
@@ -283,9 +272,8 @@ function setupEventListeners() {
     // Action buttons
     saveSticker.addEventListener('click', saveToCollection);
     downloadCurrent.addEventListener('click', downloadCurrentSticker);
-    resetBtn.addEventListener('click', resetCanvas);
-    clearAllBtn.addEventListener('click', clearAllStickers);
-    clearAllBtn.addEventListener('click', clearAllStickers);
+    if (resetBtn) resetBtn.addEventListener('click', resetCanvas);
+    if (clearAllBtn) clearAllBtn.addEventListener('click', clearAllStickers);
 
     // Sticker Grid Event Delegation (for Delete Buttons)
     stickerGrid.addEventListener('click', (e) => {
@@ -309,18 +297,20 @@ function setupEventListeners() {
 
     // Freehand Crop events
     if (freeHandBtn) {
-        freeHandBtn.addEventListener('click', startFreeHand);
-        closeFreeHandBtn.addEventListener('click', closeFreeHandModal);
-        cancelFreeHandBtn.addEventListener('click', closeFreeHandModal);
-        resetFreeHandBtn.addEventListener('click', resetFreeHand);
+        if (freeHandBtn) freeHandBtn.addEventListener('click', startFreeHand);
+        if (closeFreeHandBtn) closeFreeHandBtn.addEventListener('click', closeFreeHandModal);
+        if (cancelFreeHandBtn) cancelFreeHandBtn.addEventListener('click', closeFreeHandModal);
+        if (resetFreeHandBtn) resetFreeHandBtn.addEventListener('click', resetFreeHand);
         if (keepInsideBtn) keepInsideBtn.addEventListener('click', () => applyFreeHand('keep'));
         if (removeInsideBtn) removeInsideBtn.addEventListener('click', () => applyFreeHand('remove'));
 
         // Drawing events
-        freeHandCanvas.addEventListener('mousedown', handleFreeHandMouseDown);
-        freeHandCanvas.addEventListener('mousemove', handleFreeHandMouseMove);
-        freeHandCanvas.addEventListener('mouseup', handleFreeHandMouseUp);
-        freeHandCanvas.addEventListener('mouseleave', handleFreeHandMouseUp);
+        if (freeHandCanvas) {
+            freeHandCanvas.addEventListener('mousedown', handleFreeHandMouseDown);
+            freeHandCanvas.addEventListener('mousemove', handleFreeHandMouseMove);
+            freeHandCanvas.addEventListener('mouseup', handleFreeHandMouseUp);
+            freeHandCanvas.addEventListener('mouseleave', handleFreeHandMouseUp);
+        }
     }
 
     // Auto Cutout events
@@ -846,7 +836,6 @@ function resetCanvas() {
     globalSizeValue.textContent = '100%';
     globalRotation.value = 0;
     globalRotationValue.textContent = '0°';
-    sizeLabel.textContent = '画像サイズ';
     textElements = [];
     effectElements = [];
     backgroundColor = 'transparent';
