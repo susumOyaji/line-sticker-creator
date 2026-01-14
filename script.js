@@ -1331,13 +1331,97 @@ function autoCutout() {
     // Update image
     ctx.putImageData(imageData, 0, 0);
 
-    const newImage = new Image();
-    newImage.onload = () => {
-        currentImage = newImage;
-        updateCanvas();
-        alert('背景を自動除去しました');
+    const processedImage = new Image();
+    processedImage.onload = () => {
+        if (confirm('背景を自動除去しました。\n白枠（フチドリ）を追加しますか？\n(LINEスタンプとしての視認性が向上します)')) {
+            addWhiteBorder(processedImage);
+        } else {
+            currentImage = processedImage;
+            updateCanvas();
+            // Reset transform to fit
+            const scale = Math.min(
+                STICKER_WIDTH / processedImage.width,
+                STICKER_HEIGHT / processedImage.height
+            );
+            imageTransform.scale = scale;
+            if (globalSize) { // Update slider if exists
+                globalSize.value = Math.round(scale * 100);
+                globalSizeValue.textContent = `${Math.round(scale * 100)}%`;
+            }
+        }
     };
-    newImage.src = tempCanvas.toDataURL('image/png');
+    processedImage.src = tempCanvas.toDataURL('image/png');
+}
+
+function addWhiteBorder(sourceImage) {
+    const borderThickness = 8; // Pixel thickness of the white border
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Make canvas slightly larger to accommodate border
+    canvas.width = sourceImage.width + (borderThickness * 2);
+    canvas.height = sourceImage.height + (borderThickness * 2);
+
+    // Draw white silhouette by determining non-transparent pixels
+    // or simply drawing the image multiple times with offsets for a solid stroke effect
+    // This "8-way offset" method produces a clean, solid outline
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#FFFFFF';
+
+    // Optimization: Draw in a circle to create rounder corners
+    const steps = 16;
+    for (let i = 0; i < steps; i++) {
+        const angle = (i / steps) * 2 * Math.PI;
+        const offsetX = Math.cos(angle) * borderThickness;
+        const offsetY = Math.sin(angle) * borderThickness;
+
+        ctx.drawImage(
+            sourceImage,
+            borderThickness + offsetX,
+            borderThickness + offsetY
+        );
+    }
+
+    // Fill all non-transparent pixels with white to make it a solid silhouette
+    // This connects the "dots" of the previous step
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Now draw the original image on top
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(sourceImage, borderThickness, borderThickness);
+
+    const borderedImage = new Image();
+    borderedImage.onload = () => {
+        currentImage = borderedImage;
+
+        // Reset transform to fit new size
+        const scale = Math.min(
+            STICKER_WIDTH / borderedImage.width,
+            STICKER_HEIGHT / borderedImage.height
+        );
+        imageTransform = {
+            x: STICKER_WIDTH / 2,
+            y: STICKER_HEIGHT / 2,
+            scale: scale,
+            rotation: 0
+        };
+
+        // Update UI controls
+        if (globalSize) {
+            globalSize.value = Math.round(scale * 100);
+            globalSizeValue.textContent = `${Math.round(scale * 100)}%`;
+        }
+        if (globalRotation) {
+            globalRotation.value = 0;
+            globalRotationValue.textContent = '0°';
+        }
+
+        updateCanvas();
+        alert('白枠付きで作成しました！');
+    };
+    borderedImage.src = canvas.toDataURL('image/png');
 }
 
 // ===== Initialize App =====
