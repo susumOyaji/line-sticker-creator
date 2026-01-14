@@ -782,9 +782,13 @@ button:disabled {
     min-height: 400px;
 }
 
-.crop-container img {
+/* Fix for Cropper.js inside Flexbox */
+.crop-container img,
+.cropper-container {
     display: block;
     max-width: 100%;
+    min-width: 0;
+    /* Crucial for allowing flex items to shrink below content size */
 }
 
 .bg-checkerboard {
