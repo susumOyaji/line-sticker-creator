@@ -786,7 +786,6 @@ function handleCanvasDoubleClick(e) {
 function updateControlsForSelection() {
     if (selectedElement.type === 'text' && textElements[selectedElement.index]) {
         const text = textElements[selectedElement.index];
-        sizeLabel.textContent = '文字サイズ';
         globalSize.min = 10;
         globalSize.max = 100;
         globalSize.value = text.size;
@@ -799,7 +798,6 @@ function updateControlsForSelection() {
         fontWeight.value = text.weight;
     } else if (selectedElement.type === 'effect' && effectElements[selectedElement.index]) {
         const effect = effectElements[selectedElement.index];
-        sizeLabel.textContent = 'サイズ';
         globalSize.min = 10;
         globalSize.max = 200;
         globalSize.value = effect.size;
@@ -809,7 +807,6 @@ function updateControlsForSelection() {
         globalRotationValue.textContent = `${effect.rotation || 0}°`;
     } else {
         // Image or no selection
-        sizeLabel.textContent = '画像サイズ';
         globalSize.min = 10;
         globalSize.max = 200;
         globalSize.value = Math.round(imageTransform.scale * 100);
