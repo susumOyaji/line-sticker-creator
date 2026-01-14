@@ -1,0 +1,80 @@
+<div class="tools-section">
+    <!-- Image Adjustment -->
+    <div class="tool-group">
+        <label class="tool-label">Image Adjustment</label>
+        <div class="grid-3-cols">
+            <button class="btn-secondary" id="cropBtn" disabled title="矩形切り抜き">RECT</button>
+            <button class="btn-secondary" id="freeHandBtn" disabled title="自由切り抜き">FREE</button>
+            <button class="btn-secondary" id="autoCutBtn" disabled title="自動切り抜き">AUTO</button>
+        </div>
+    </div>
+
+    <!-- Transformation -->
+    <div class="tool-group property-editor" id="propertyEditor">
+        <label class="tool-label">Transformation</label>
+        <div class="style-controls">
+            <label class="control-sublabel">SIZE</label>
+            <input type="range" id="globalSize" min="10" max="200" step="1" value="100">
+            <span class="size-label" id="globalSizeValue">100%</span>
+        </div>
+        <div class="style-controls">
+            <label class="control-sublabel">ROTATE</label>
+            <input type="range" id="globalRotation" min="0" max="360" step="1" value="0">
+            <span class="size-label" id="globalRotationValue">0°</span>
+        </div>
+    </div>
+
+    <!-- Text Add -->
+    <div class="tool-group">
+        <label class="tool-label">Typography</label>
+        <div class="input-group" style="display: flex; gap: 10px;">
+            <input type="text" id="textInput" placeholder="テキストを入力..." maxlength="20">
+            <button class="btn-primary" id="addTextBtn">ADD</button>
+        </div>
+        <div class="grid-2-cols" style="margin-top: 10px;">
+            <input type="color" id="textColor" value="#000000" title="テキスト色">
+            <select id="fontWeight">
+                <option value="400">Normal</option>
+                <option value="700" selected>Bold</option>
+                <option value="900">Heavy</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Overlays & Effects -->
+    <div class="tool-group">
+        <label class="tool-label">Overlays & Effects</label>
+        <div class="input-group" style="display: flex; gap: 10px;">
+            <select id="effectSelect" style="flex: 1;">
+                <option value="" disabled selected>効果を選択...</option>
+                <option value="sweat">💦 汗</option>
+                <option value="tears">😢 泣き顔</option>
+                <option value="heart">❤️ ハート</option>
+                <option value="star">⭐ 星</option>
+                <option value="anger">💢 怒り</option>
+                <option value="zzz">💤 眠り</option>
+                <option value="sparkle">✨ きらきら</option>
+                <option value="note">🎵 音符</option>
+                <option value="exclam">❗ ビックリ</option>
+                <option value="question">❓ はてな</option>
+                <option value="laugh">😆 笑い</option>
+                <option value="thumbsup">👍 グッド</option>
+                <option value="fire">🔥 燃える</option>
+                <option value="skull">💀 ドクロ</option>
+                <option value="bulb">💡 ひらめき</option>
+                <option value="ok">⭕ OK</option>
+            </select>
+            <button class="btn-primary" id="addEffectBtn">ADD</button>
+        </div>
+    </div>
+
+    <!-- Canvas Style -->
+    <div class="tool-group">
+        <label class="tool-label">Canvas Backdrop</label>
+        <div class="grid-3-cols">
+            <button class="btn-secondary" id="transparentBg">透明</button>
+            <button class="btn-secondary" id="whiteBg">白色</button>
+            <input type="color" id="bgColor" value="#ffffff" title="背景色">
+        </div>
+    </div>
+</div>
