@@ -360,6 +360,13 @@ function handleImageUpload(file) {
 
 // ===== Canvas Drawing =====
 function updateCanvas() {
+    // Content state check for upload prompt visibility
+    const hasContent = currentImage || textElements.length > 0 || effectElements.length > 0 || backgroundColor !== 'transparent';
+    if (hasContent) {
+        uploadPrompt.classList.add('hidden');
+    } else {
+        uploadPrompt.classList.remove('hidden');
+    }
     // Update container background class for visual feedback
     if (backgroundColor === 'transparent') {
         canvasContainer.classList.add('transparent-mode');
@@ -407,8 +414,8 @@ function updateCanvas() {
         ctx.textBaseline = 'middle';
 
         // Add stroke for better visibility
-        ctx.strokeStyle = text.color === '#000000' ? '#ffffff' : '#000000';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 18;
         ctx.strokeText(text.content, 0, 0);
         ctx.fillText(text.content, 0, 0);
 
@@ -465,7 +472,7 @@ function addText() {
     const text = {
         content: content,
         x: STICKER_WIDTH / 2,
-        y: STICKER_HEIGHT - 40,
+        y: currentImage ? STICKER_HEIGHT - 40 : STICKER_HEIGHT / 2,
         size: 40, // Default font size
         color: textColor.value,
         weight: fontWeight.value,
@@ -904,7 +911,12 @@ function renderStickerGrid() {
     stickerGrid.innerHTML = stickerCollection.map(sticker => `
         <div class="sticker-item" data-id="${sticker.id}">
             <img src="${sticker.dataUrl}" alt="Sticker">
-            <button class="delete-btn" data-id="${sticker.id}">
+            <button class="edit-btn" data-id="${sticker.id}" title="再編集">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/>
+                </svg>
+            </button>
+            <button class="delete-btn" data-id="${sticker.id}" title="削除">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
                 </svg>
@@ -912,15 +924,76 @@ function renderStickerGrid() {
         </div>
     `).join('');
 
-    // Attach event listeners directly to delete buttons
+    // Attach event listeners directly to buttons
     stickerGrid.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('Delete button clicked'); // Debug
             const id = Number(btn.dataset.id);
             deleteSticker(id);
         });
     });
+
+    stickerGrid.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = Number(btn.dataset.id);
+            editSticker(id);
+        });
+    });
+}
+
+// ===== Edit Sticker =====
+function editSticker(id) {
+    const sticker = stickerCollection.find(s => s.id === id);
+    if (!sticker) return;
+
+    if (currentImage || textElements.length > 0 || effectElements.length > 0) {
+        if (!confirm('現在の作業内容は上書きされます。このスタンプを再編集しますか？')) {
+            return;
+        }
+    }
+
+    const img = new Image();
+    img.onload = () => {
+        currentImage = img;
+        // Reset transform
+        const scale = Math.min(
+            STICKER_WIDTH / img.width,
+            STICKER_HEIGHT / img.height
+        );
+        imageTransform = {
+            x: STICKER_WIDTH / 2,
+            y: STICKER_HEIGHT / 2,
+            scale: scale,
+            rotation: 0
+        };
+
+        // Clear other elements as they are flattened in the saved image
+        textElements = [];
+        effectElements = [];
+        backgroundColor = 'transparent';
+
+        // Reset UI controls
+        if (globalSize) {
+            globalSize.value = Math.round(scale * 100);
+            globalSizeValue.textContent = `${Math.round(scale * 100)}%`;
+        }
+        if (globalRotation) {
+            globalRotation.value = 0;
+            globalRotationValue.textContent = '0°';
+        }
+        if (cropBtn) cropBtn.disabled = false;
+        if (freeHandBtn) freeHandBtn.disabled = false;
+        if (autoCutBtn) autoCutBtn.disabled = false;
+
+        uploadPrompt.classList.add('hidden');
+
+        updateCanvas();
+
+        // Brief feedback
+        alert('スタンプをエディターに読み込みました。\n(テキストやスタンプは画像化されています)');
+    };
+    img.src = sticker.dataUrl;
 }
 
 // ===== Delete Sticker =====
@@ -966,6 +1039,8 @@ function downloadCurrentSticker() {
 // ===== Download All Stickers (ZIP) =====
 let isDownloading = false;
 
+
+
 async function downloadAllStickers() {
     if (isDownloading) return;
 
@@ -974,7 +1049,7 @@ async function downloadAllStickers() {
         return;
     }
 
-    if (!confirm(`${stickerCollection.length}個のスタンプをZIPファイルとしてダウンロードしますか？`)) {
+    if (!confirm(`${stickerCollection.length}個のスタンプを1枚ずつダウンロードフォルダに保存します。\n(※多くのファイルが保存されます。ブラウザのダウンロード許可が必要な場合があります。)\n\nよろしいですか？`)) {
         return;
     }
 
@@ -985,32 +1060,49 @@ async function downloadAllStickers() {
         <svg viewBox="0 0 24 24" class="animate-spin" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 4V2A10 10 0 002 12h2a8 8 0 018-8z" fill="currentColor"/>
         </svg>
-        作成中...
+        保存中 0/${stickerCollection.length}
     `;
 
     try {
-        const zip = new JSZip();
+        for (let i = 0; i < stickerCollection.length; i++) {
+            // Update progress
+            downloadAllBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" class="animate-spin" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 4V2A10 10 0 002 12h2a8 8 0 018-8z" fill="currentColor"/>
+                </svg>
+                保存中 ${i + 1}/${stickerCollection.length}
+            `;
 
-        stickerCollection.forEach((sticker, index) => {
-            const num = String(index + 1).padStart(2, '0');
+            const sticker = stickerCollection[i];
+            const num = String(i + 1).padStart(2, '0');
             const fileName = `sticker-${num}.png`;
-            // dataUrl is 'data:image/png;base64,iVBORw0KGgo...
-            const imgData = sticker.dataUrl.split(',')[1];
-            zip.file(fileName, imgData, { base64: true });
-        });
 
-        const content = await zip.generateAsync({ type: 'blob' });
+            // Convert DataURL to Blob for better browser handling
+            const response = await fetch(sticker.dataUrl);
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
 
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = `LINE-stickers-${Date.now()}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up object URL
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+            // Wait significantly longer to bypass some browser throttles
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+        alert('全ての画像の保存リクエストを完了しました。\n保存されていない画像がある場合は、ブラウザの「複数ファイルのダウンロード許可」を確認してください。');
 
     } catch (error) {
-        console.error('ZIPファイルの作成に失敗しました:', error);
-        alert('ZIPファイルの作成に失敗しました。');
+        console.error('ダウンロード処理中にエラーが発生しました:', error);
+        alert(`ダウンロード中にエラーが発生しました: ${error.message}`);
     } finally {
         isDownloading = false;
         downloadAllBtn.disabled = false;

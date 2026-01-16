@@ -148,6 +148,7 @@ body {
     font-weight: 800;
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, var(--success), var(--primary-light));
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -678,6 +679,34 @@ button:disabled {
 .sticker-item .delete-btn:hover {
     transform: scale(1.2) rotate(90deg);
     background: #ff5f5f;
+}
+
+.sticker-item .edit-btn {
+    position: absolute;
+    top: 8px;
+    right: 44px;
+    width: 28px;
+    height: 28px;
+    background: var(--primary);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    padding: 6px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticker-item:hover .edit-btn {
+    opacity: 1;
+}
+
+.sticker-item .edit-btn:hover {
+    transform: scale(1.2) rotate(-15deg);
+    background: var(--primary-light);
 }
 
 /* Effects Grid replaced by Dropdown */
